@@ -1,0 +1,16 @@
+apiVersion: v2
+name: tuwunel
+description: A Helm chart for Tuwunel Matrix homeserver
+type: application
+version: 0.1.0
+appVersion: "1.8.2"
+home: https://tuwunel.chat
+sources:
+  - https://github.com/tuwunel/tuwunel
+maintainers:
+  - name: assi
+keywords:
+  - matrix
+  - homeserver
+  - tuwunel
+  - chat

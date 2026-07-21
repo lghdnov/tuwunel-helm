@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-config
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+data:
+  tuwunel.toml: |
+    [global]
+    server_name = "{{ required "serverName is required" .Values.serverName }}"
+    database_path = "{{ .Values.databasePath }}"
+    port = {{ .Values.port }}
+    new_user_displayname_suffix = "{{ .Values.config.newUserDisplaynameSuffix }}"
+    max_request_size = {{ .Values.config.maxRequestSize }}
+    allow_registration = {{ .Values.config.allowRegistration }}
+    allow_federation = {{ .Values.config.allowFederation }}
+    allow_check_forgotten_key = {{ .Values.config.allowCheckForgottenKey }}
+    log_level = "{{ .Values.config.logLevel }}"
+
+    {{- if .Values.config.trustedServers }}
+    [trusted_servers]
+    servers = {{ .Values.config.trustedServers | toJson }}
+    {{- end }}
+
+    {{- if .Values.metrics.enabled }}
+    [metrics]
+    enabled = true
+    bind = "0.0.0.0"
+    port = {{ .Values.metrics.port }}
+    {{- end }}
+
+    {{- if .Values.config.wellKnown.server }}
+    [global.well_known]
+    server = "{{ .Values.config.wellKnown.server }}"
+    {{- if .Values.config.wellKnown.client.homeserverUrl }}
+    [global.well_known.client]
+    homeserver_url = "{{ .Values.config.wellKnown.client.homeserverUrl }}"
+    {{- if .Values.config.wellKnown.client.identityServerUrl }}
+    identity_server_url = "{{ .Values.config.wellKnown.client.identityServerUrl }}"
+    {{- end }}
+    {{- end }}
+    {{- end }}

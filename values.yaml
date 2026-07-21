@@ -1,0 +1,82 @@
+image:
+  repository: jevolk/tuwunel
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+serverName: ""
+databasePath: "/data"
+port: 8008
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8008
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+  hosts:
+    - host: tuwunel.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: tuwunel-tls
+      hosts:
+        - tuwunel.local
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+persistence:
+  enabled: true
+  storageClass: "local-path"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+config:
+  newUserDisplaynameSuffix: "💕"
+  maxRequestSize: 10485760
+  allowRegistration: true
+  allowFederation: false
+  allowCheckForgottenKey: true
+  logLevel: "info"
+  trustedServers: []
+  adminRoomTag: "admin"
+  wellKnown:
+    server: ""
+    client:
+      homeserverUrl: ""
+      identityServerUrl: ""
+  additionalConfig: {}
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+metrics:
+  enabled: false
+  port: 9000
+
+serviceAccount:
+  create: true
+  name: ""

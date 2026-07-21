@@ -77,6 +77,14 @@ metrics:
   enabled: false
   port: 9000
 
+wellKnown:
+  enabled: false
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+  tls: []
+
 serviceAccount:
   create: true
   name: ""

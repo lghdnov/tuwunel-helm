@@ -1,0 +1,33 @@
+{{- if .Values.wellKnown.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-wellknown
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: wellknown
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "tuwunel.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: wellknown
+  template:
+    metadata:
+      labels:
+        {{- include "tuwunel.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: wellknown
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: wellknown
+              mountPath: /usr/share/nginx/html/.well-known/matrix
+      volumes:
+        - name: wellknown
+          configMap:
+            name: {{ include "tuwunel.fullname" . }}-wellknown
+{{- end }}

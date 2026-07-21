@@ -1,0 +1,18 @@
+{{- if .Values.wellKnown.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-wellknown
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "tuwunel.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: wellknown
+{{- end }}

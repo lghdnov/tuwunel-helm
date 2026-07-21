@@ -1,0 +1,44 @@
+{{- if .Values.wellKnown.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-wellknown
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+  {{- with .Values.wellKnown.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.wellKnown.className }}
+  ingressClassName: {{ .Values.wellKnown.className }}
+  {{- end }}
+  {{- if .Values.wellKnown.tls }}
+  tls:
+    {{- range .Values.wellKnown.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.serverName | quote }}
+      http:
+        paths:
+          - path: /.well-known/matrix/server
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "tuwunel.fullname" . }}-wellknown
+                port:
+                  number: 80
+          - path: /.well-known/matrix/client
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "tuwunel.fullname" . }}-wellknown
+                port:
+                  number: 80
+{{- end }}

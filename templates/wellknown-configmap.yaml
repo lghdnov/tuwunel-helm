@@ -1,0 +1,19 @@
+{{- if .Values.wellKnown.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-wellknown
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+data:
+  server.json: |
+    {
+      "m.server": "matrix.{{ .Values.serverName }}:443"
+    }
+  client.json: |
+    {
+      "m.homeserver": {
+        "base_url": "https://matrix.{{ .Values.serverName }}"
+      }
+    }
+{{- end }}

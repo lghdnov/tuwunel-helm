@@ -18,16 +18,33 @@ spec:
         {{- include "tuwunel.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: wellknown
     spec:
+      initContainers:
+        - name: setup
+          image: busybox:stable
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /wellknown/.well-known/matrix
+              cp /config/server.json /wellknown/.well-known/matrix/server
+              cp /config/client.json /wellknown/.well-known/matrix/client
+          volumeMounts:
+            - name: wellknown-config
+              mountPath: /config
+            - name: wellknown-data
+              mountPath: /wellknown
       containers:
         - name: nginx
           image: nginx:alpine
           ports:
             - containerPort: 80
           volumeMounts:
-            - name: wellknown
-              mountPath: /usr/share/nginx/html/.well-known/matrix
+            - name: wellknown-data
+              mountPath: /usr/share/nginx/html
       volumes:
-        - name: wellknown
+        - name: wellknown-config
           configMap:
             name: {{ include "tuwunel.fullname" . }}-wellknown
+        - name: wellknown-data
+          emptyDir: {}
 {{- end }}

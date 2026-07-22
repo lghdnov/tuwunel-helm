@@ -19,3 +19,4 @@ spec:
     {{- end }}
   selector:
     {{- include "tuwunel.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: homeserver

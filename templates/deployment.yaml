@@ -11,6 +11,7 @@ spec:
   selector:
     matchLabels:
       {{- include "tuwunel.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: homeserver
   template:
     metadata:
       annotations:
@@ -20,6 +21,7 @@ spec:
         {{- end }}
       labels:
         {{- include "tuwunel.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: homeserver
     spec:
       enableServiceLinks: false
       serviceAccountName: {{ include "tuwunel.serviceAccountName" . }}

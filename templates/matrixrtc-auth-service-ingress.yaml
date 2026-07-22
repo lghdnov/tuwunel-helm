@@ -26,4 +26,8 @@ spec:
                 name: {{ $fullName }}-matrixrtc-auth
                 port:
                   number: {{ $svcPort }}
+  {{- if .Values.matrixRtc.authService.ingress.tls }}
+  tls:
+    {{- toYaml .Values.matrixRtc.authService.ingress.tls | nindent 4 }}
+  {{- end }}
 {{- end }}

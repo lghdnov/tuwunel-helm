@@ -230,6 +230,7 @@ matrixRtc:
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
       host: ""
       pathPrefix: "/livekit/jwt"
+      tls: []
 
     # Pod topology — if you need to co-locate with the homeserver
     nodeSelector: {}

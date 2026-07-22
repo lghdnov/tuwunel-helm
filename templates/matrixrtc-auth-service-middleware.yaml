@@ -1,0 +1,12 @@
+{{- if and .Values.matrixRtc.enabled .Values.matrixRtc.authService.deploy .Values.matrixRtc.authService.ingress.enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-matrixrtc-auth-stripprefix
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+spec:
+  stripPrefix:
+    prefixes:
+      - {{ .Values.matrixRtc.authService.ingress.pathPrefix }}
+{{- end }}

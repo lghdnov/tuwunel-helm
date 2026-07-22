@@ -10,6 +10,7 @@ metadata:
   {{- with .Values.matrixRtc.authService.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ $.Release.Namespace }}-{{ $fullName }}-matrixrtc-auth-stripprefix@kubernetescrd"
   {{- end }}
 spec:
   {{- if .Values.matrixRtc.authService.ingress.className }}

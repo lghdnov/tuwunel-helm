@@ -14,6 +14,15 @@ data:
     {
       "m.homeserver": {
         "base_url": "https://matrix.{{ .Values.serverName }}"
-      }
+      }{{- if and .Values.matrixRtc.enabled .Values.matrixRtc.wellKnown.enabled }},
+      "org.matrix.msc4143.rtc_foci": [
+        {{- range $index, $foci := .Values.matrixRtc.wellKnown.foci }}
+        {{- if $index }},{{ end }}
+        {
+          "type": {{ $foci.type | quote }},
+          "livekit_service_url": {{ $foci.livekit_service_url | quote }}
+        }
+        {{- end }}
+      ]{{- end }}
     }
 {{- end }}

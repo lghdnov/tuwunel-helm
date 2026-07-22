@@ -104,3 +104,123 @@ wellKnown:
 serviceAccount:
   create: true
   name: ""
+
+# ------------------------------------------------------------------
+# MatrixRTC (Voice/Video calling via LiveKit SFU)
+# ------------------------------------------------------------------
+matrixRtc:
+  enabled: false
+
+  # well-known announcement of RTC foci (MSC4143)
+  # If enabled, adds org.matrix.msc4143.rtc_foci to .well-known/matrix/client
+  wellKnown:
+    enabled: true
+    foci:
+      - type: "livekit"
+        livekit_service_url: ""
+
+  # ----------------------------------------------------------------
+  # LiveKit SFU — can be deployed as subchart or referenced externally
+  # ----------------------------------------------------------------
+  livekit:
+    # Set to false if using an external LiveKit instance
+    deploy: false
+
+    # If deploy: false, point to external LiveKit
+    externalUrl: ""           # e.g. "wss://matrix-rtc.example.com/livekit/sfu"
+    externalApiUrl: ""        # e.g. "https://matrix-rtc.example.com/livekit/sfu"
+
+    # Subchart values (livekit/livekit-server Helm chart)
+    # See: https://github.com/livekit/livekit-helm/tree/master/livekit-server
+    config:
+      port: 7880
+      rtc:
+        udp_port: 7882
+        tcp_port: 7881
+        use_external_ip: true
+        # Port range for WebRTC UDP media
+        port_range_start: 50000
+        port_range_end: 60000
+      keys:
+        devkey: "secret"        # API key for SFU auth
+      webhook:
+        api_key: "devkey"
+        urls: []
+      room:
+        auto_create: false      # MUST be false — rooms created by lk-jwt-service only
+      turn:
+        enabled: true
+        domain: ""
+        tls_port: 3478
+
+    # Ingress / LoadBalancer for LiveKit signaling
+    loadBalancer:
+      type: LoadBalancer        # or NodePort / ClusterIP
+      annotations: {}
+
+    # Node ports for UDP media (required for WebRTC)
+    # If behind NAT, hostNetwork or hostPort may be needed
+    # Trade-off: hostNetwork=true exposes all host network interfaces to the pod,
+    # breaking network isolation. Use only on dedicated nodes.
+    nodePorts:
+      enabled: false
+      udpStart: 50000
+      udpEnd: 60000
+
+    # Alternative to nodePorts: run LiveKit pod in hostNetwork mode.
+    # Required for wide UDP port ranges in many k3s/Traefik setups.
+    # WARNING: disables pod network isolation; use with pod security policies.
+    hostNetwork: false
+
+  # ----------------------------------------------------------------
+  # MatrixRTC Authorization Service (lk-jwt-service)
+  # ----------------------------------------------------------------
+  authService:
+    deploy: true
+
+    image:
+      repository: ghcr.io/element-hq/lk-jwt-service
+      tag: "latest"
+      pullPolicy: IfNotPresent
+
+    # Service binds to this port internally
+    port: 8080
+
+    # Required environment variables
+    env:
+      LIVEKIT_URL: ""                       # ws(s):// URL of LiveKit SFU
+      LIVEKIT_KEY: ""                       # LiveKit API key
+      LIVEKIT_SECRET: ""                    # LiveKit API secret
+      LIVEKIT_FULL_ACCESS_HOMESERVERS: ""   # Comma-separated list, e.g. "example.com"
+      LIVEKIT_JWT_BIND: ":8080"             # Bind address
+      LIVEKIT_SANITY_CHECK_INTERVAL_SECONDS: "0"
+      LIVEKIT_LOG_LEVEL: "info"
+      # Optional:
+      # LIVEKIT_REDIS_URL: "redis://redis:6379"
+      # LIVEKIT_CS_API_URL_OVERRIDES: ""
+
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+    service:
+      type: ClusterIP
+      port: 8080
+
+    ingress:
+      enabled: true
+      className: "traefik"
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      host: ""
+      pathPrefix: "/livekit/jwt"
+
+    # Pod topology — if you need to co-locate with the homeserver
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+

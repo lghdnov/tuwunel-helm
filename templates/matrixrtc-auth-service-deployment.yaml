@@ -1,0 +1,86 @@
+{{- if and .Values.matrixRtc.enabled .Values.matrixRtc.authService.deploy }}
+{{- $fullName := include "tuwunel.fullname" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-matrixrtc-auth
+  labels:
+    app.kubernetes.io/name: {{ include "tuwunel.name" . }}-matrixrtc-auth
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "tuwunel.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "tuwunel.name" . }}-matrixrtc-auth
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "tuwunel.name" . }}-matrixrtc-auth
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: matrixrtc-auth
+          image: "{{ .Values.matrixRtc.authService.image.repository }}:{{ .Values.matrixRtc.authService.image.tag }}"
+          imagePullPolicy: {{ .Values.matrixRtc.authService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.matrixRtc.authService.port }}
+              protocol: TCP
+          env:
+            - name: LIVEKIT_URL
+              value: {{ .Values.matrixRtc.authService.env.LIVEKIT_URL | default "" | quote }}
+            - name: LIVEKIT_KEY
+              value: {{ .Values.matrixRtc.authService.env.LIVEKIT_KEY | default "" | quote }}
+            - name: LIVEKIT_SECRET
+              value: {{ .Values.matrixRtc.authService.env.LIVEKIT_SECRET | default "" | quote }}
+            - name: LIVEKIT_FULL_ACCESS_HOMESERVERS
+              value: {{ .Values.matrixRtc.authService.env.LIVEKIT_FULL_ACCESS_HOMESERVERS | default "" | quote }}
+            - name: LIVEKIT_JWT_BIND
+              value: {{ .Values.matrixRtc.authService.env.LIVEKIT_JWT_BIND | default ":8080" | quote }}
+            - name: LIVEKIT_SANITY_CHECK_INTERVAL_SECONDS
+              value: {{ .Values.matrixRtc.authService.env.LIVEKIT_SANITY_CHECK_INTERVAL_SECONDS | default "0" | quote }}
+            - name: LIVEKIT_LOG_LEVEL
+              value: {{ .Values.matrixRtc.authService.env.LIVEKIT_LOG_LEVEL | default "info" | quote }}
+            {{- if .Values.matrixRtc.authService.env.LIVEKIT_REDIS_URL }}
+            - name: LIVEKIT_REDIS_URL
+              value: {{ .Values.matrixRtc.authService.env.LIVEKIT_REDIS_URL | quote }}
+            {{- end }}
+            {{- if .Values.matrixRtc.authService.env.LIVEKIT_CS_API_URL_OVERRIDES }}
+            - name: LIVEKIT_CS_API_URL_OVERRIDES
+              value: {{ .Values.matrixRtc.authService.env.LIVEKIT_CS_API_URL_OVERRIDES | quote }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.matrixRtc.authService.resources | nindent 12 }}
+      {{- with .Values.matrixRtc.authService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.matrixRtc.authService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.matrixRtc.authService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

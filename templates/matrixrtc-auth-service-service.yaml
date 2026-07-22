@@ -1,0 +1,20 @@
+{{- if and .Values.matrixRtc.enabled .Values.matrixRtc.authService.deploy }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-matrixrtc-auth
+  labels:
+    app.kubernetes.io/name: {{ include "tuwunel.name" . }}-matrixrtc-auth
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "tuwunel.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.matrixRtc.authService.service.type }}
+  ports:
+    - port: {{ .Values.matrixRtc.authService.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ include "tuwunel.name" . }}-matrixrtc-auth
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

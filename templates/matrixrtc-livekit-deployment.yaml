@@ -1,0 +1,91 @@
+{{- if and .Values.matrixRtc.enabled .Values.matrixRtc.livekit.deploy }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-livekit
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: livekit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "tuwunel.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: livekit
+  template:
+    metadata:
+      labels:
+        {{- include "tuwunel.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: livekit
+    spec:
+      {{- if .Values.matrixRtc.livekit.hostNetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: livekit
+          image: "livekit/livekit-server:v1.8.4"
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--config"
+            - "/etc/livekit/livekit.yaml"
+          ports:
+            - name: http
+              containerPort: {{ .Values.matrixRtc.livekit.config.port }}
+              protocol: TCP
+            - name: rtc-tcp
+              containerPort: {{ .Values.matrixRtc.livekit.config.rtc.tcp_port }}
+              protocol: TCP
+            - name: rtc-udp
+              containerPort: {{ .Values.matrixRtc.livekit.config.rtc.udp_port }}
+              protocol: UDP
+            {{- if .Values.matrixRtc.livekit.config.turn.enabled }}
+            - name: turn
+              containerPort: {{ .Values.matrixRtc.livekit.config.turn.tls_port }}
+              protocol: UDP
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/livekit
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 1Gi
+            requests:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "tuwunel.fullname" . }}-livekit-config
+      {{- with .Values.matrixRtc.livekit.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.matrixRtc.livekit.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.matrixRtc.livekit.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

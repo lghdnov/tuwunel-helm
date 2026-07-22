@@ -172,6 +172,18 @@ matrixRtc:
     # WARNING: disables pod network isolation; use with pod security policies.
     hostNetwork: false
 
+    # Ingress for LiveKit signaling (WebSocket/WebRTC signaling endpoint)
+    ingress:
+      enabled: true
+      className: "traefik"
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+      host: ""
+      tls:
+        - secretName: livekit-tls
+          hosts: []
+
   # ----------------------------------------------------------------
   # MatrixRTC Authorization Service (lk-jwt-service)
   # ----------------------------------------------------------------

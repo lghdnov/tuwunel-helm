@@ -1,0 +1,32 @@
+{{- if and .Values.matrixRtc.enabled .Values.matrixRtc.livekit.deploy }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-livekit-config
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: livekit
+data:
+  livekit.yaml: |
+    port: {{ .Values.matrixRtc.livekit.config.port }}
+    rtc:
+      udp_port: {{ .Values.matrixRtc.livekit.config.rtc.udp_port }}
+      tcp_port: {{ .Values.matrixRtc.livekit.config.rtc.tcp_port }}
+      use_external_ip: {{ .Values.matrixRtc.livekit.config.rtc.use_external_ip }}
+      port_range_start: {{ .Values.matrixRtc.livekit.config.rtc.port_range_start }}
+      port_range_end: {{ .Values.matrixRtc.livekit.config.rtc.port_range_end }}
+    keys:
+      {{- toYaml .Values.matrixRtc.livekit.config.keys | nindent 6 }}
+    webhook:
+      api_key: {{ .Values.matrixRtc.livekit.config.webhook.api_key | quote }}
+      urls:
+        {{- toYaml .Values.matrixRtc.livekit.config.webhook.urls | nindent 8 }}
+    room:
+      auto_create: {{ .Values.matrixRtc.livekit.config.room.auto_create }}
+    {{- if .Values.matrixRtc.livekit.config.turn.enabled }}
+    turn:
+      enabled: true
+      domain: {{ .Values.matrixRtc.livekit.config.turn.domain | quote }}
+      tls_port: {{ .Values.matrixRtc.livekit.config.turn.tls_port }}
+    {{- end }}
+{{- end }}

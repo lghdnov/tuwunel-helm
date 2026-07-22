@@ -1,0 +1,39 @@
+{{- if and .Values.matrixRtc.enabled .Values.matrixRtc.livekit.deploy }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-livekit
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: livekit
+  {{- if eq .Values.matrixRtc.livekit.loadBalancer.type "LoadBalancer" }}
+  {{- with .Values.matrixRtc.livekit.loadBalancer.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+spec:
+  type: {{ .Values.matrixRtc.livekit.loadBalancer.type }}
+  ports:
+    - port: {{ .Values.matrixRtc.livekit.config.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.matrixRtc.livekit.config.rtc.tcp_port }}
+      targetPort: rtc-tcp
+      protocol: TCP
+      name: rtc-tcp
+    - port: {{ .Values.matrixRtc.livekit.config.rtc.udp_port }}
+      targetPort: rtc-udp
+      protocol: UDP
+      name: rtc-udp
+    {{- if .Values.matrixRtc.livekit.config.turn.enabled }}
+    - port: {{ .Values.matrixRtc.livekit.config.turn.tls_port }}
+      targetPort: turn
+      protocol: UDP
+      name: turn
+    {{- end }}
+  selector:
+    {{- include "tuwunel.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: livekit
+{{- end }}

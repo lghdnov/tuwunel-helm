@@ -1,0 +1,32 @@
+{{- if and .Values.matrixRtc.enabled .Values.matrixRtc.livekit.deploy .Values.matrixRtc.livekit.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "tuwunel.fullname" . }}-livekit
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: livekit
+  {{- with .Values.matrixRtc.livekit.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.matrixRtc.livekit.ingress.className }}
+  ingressClassName: {{ .Values.matrixRtc.livekit.ingress.className }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.matrixRtc.livekit.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "tuwunel.fullname" . }}-livekit
+                port:
+                  number: {{ .Values.matrixRtc.livekit.config.port }}
+  {{- if .Values.matrixRtc.livekit.ingress.tls }}
+  tls:
+    {{- toYaml .Values.matrixRtc.livekit.ingress.tls | nindent 4 }}
+  {{- end }}
+{{- end }}

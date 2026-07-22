@@ -4,9 +4,8 @@ kind: Service
 metadata:
   name: {{ include "tuwunel.fullname" . }}-matrixrtc-auth
   labels:
-    app.kubernetes.io/name: {{ include "tuwunel.name" . }}-matrixrtc-auth
-    app.kubernetes.io/instance: {{ .Release.Name }}
     {{- include "tuwunel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: matrixrtc-auth
 spec:
   type: {{ .Values.matrixRtc.authService.service.type }}
   ports:
@@ -15,6 +14,6 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: {{ include "tuwunel.name" . }}-matrixrtc-auth
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "tuwunel.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: matrixrtc-auth
 {{- end }}

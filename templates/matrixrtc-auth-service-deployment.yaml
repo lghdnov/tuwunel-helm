@@ -5,20 +5,19 @@ kind: Deployment
 metadata:
   name: {{ $fullName }}-matrixrtc-auth
   labels:
-    app.kubernetes.io/name: {{ include "tuwunel.name" . }}-matrixrtc-auth
-    app.kubernetes.io/instance: {{ .Release.Name }}
     {{- include "tuwunel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: matrixrtc-auth
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "tuwunel.name" . }}-matrixrtc-auth
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "tuwunel.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: matrixrtc-auth
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "tuwunel.name" . }}-matrixrtc-auth
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- include "tuwunel.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: matrixrtc-auth
     spec:
       enableServiceLinks: false
       securityContext:

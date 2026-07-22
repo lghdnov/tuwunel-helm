@@ -14,6 +14,8 @@ spec:
       app.kubernetes.io/component: wellknown
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/wellknown-configmap.yaml") . | sha256sum }}
       labels:
         {{- include "tuwunel.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: wellknown

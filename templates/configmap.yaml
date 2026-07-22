@@ -18,6 +18,11 @@ data:
     {{- if .Values.config.yesIAmVerySure }}
     yes_i_am_very_very_sure_i_want_an_open_registration_server_prone_to_abuse = true
     {{- end }}
+    {{- if .Values.registrationToken }}
+    registration_token = "{{ .Values.registrationToken }}"
+    {{- else if .Values.registrationTokenSecret.enabled }}
+    registration_token_file = "{{ .Values.registrationTokenSecret.mountPath }}"
+    {{- end }}
 
     {{- if .Values.metrics.enabled }}
     [metrics]

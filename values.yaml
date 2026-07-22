@@ -65,6 +65,22 @@ config:
       identityServerUrl: ""
   additionalConfig: {}
 
+# Static registration token. If set, new users must provide this token when registering.
+# For token-only registration, set allowRegistration: true and provide a token here
+# or via registrationTokenSecret. Do NOT set yesIAmVerySure together with a token.
+registrationToken: ""
+
+# Alternatively, mount an existing Kubernetes Secret containing the registration token.
+registrationTokenSecret:
+  enabled: false
+  # Name of an existing Secret in the same namespace.
+  # The Secret must contain the key specified below.
+  name: ""
+  # Key inside the Secret that holds the token string.
+  key: "token"
+  # Path where the token file will be mounted inside the container.
+  mountPath: "/etc/tuwunel/secrets/registration_token"
+
 podAnnotations: {}
 
 nodeSelector: {}

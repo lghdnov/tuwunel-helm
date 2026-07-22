@@ -45,6 +45,11 @@ spec:
               mountPath: /etc/tuwunel
             - name: data
               mountPath: {{ .Values.databasePath }}
+            {{- if .Values.registrationTokenSecret.enabled }}
+            - name: registration-token
+              mountPath: {{ dir .Values.registrationTokenSecret.mountPath }}
+              readOnly: true
+            {{- end }}
           livenessProbe:
             tcpSocket:
               port: http
@@ -61,6 +66,14 @@ spec:
         - name: config
           configMap:
             name: {{ include "tuwunel.fullname" . }}-config
+        {{- if .Values.registrationTokenSecret.enabled }}
+        - name: registration-token
+          secret:
+            secretName: {{ .Values.registrationTokenSecret.name }}
+            items:
+              - key: {{ .Values.registrationTokenSecret.key }}
+                path: {{ base .Values.registrationTokenSecret.mountPath }}
+        {{- end }}
         {{- if .Values.persistence.enabled }}
         - name: data
           persistentVolumeClaim:

@@ -30,3 +30,15 @@ data:
     bind = "0.0.0.0"
     port = {{ .Values.metrics.port | int }}
     {{- end }}
+    {{- range $id, $svc := .Values.appservices }}
+    [global.appservice.{{ $id }}]
+    url = "{{ $svc.url }}"
+    as_token = "{{ $svc.asToken }}"
+    hs_token = "{{ $svc.hsToken }}"
+    sender_localpart = "{{ $svc.senderLocalpart }}"
+    {{- range $svc.users }}
+    [[global.appservice.{{ $id }}.users]]
+    exclusive = {{ .exclusive }}
+    regex = '{{ .regex }}'
+    {{- end }}
+    {{- end }}

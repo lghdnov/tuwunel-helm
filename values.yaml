@@ -237,3 +237,18 @@ matrixRtc:
     tolerations: []
     affinity: {}
 
+
+# ------------------------------------------------------------------
+# Appservice registrations (bridges, bots, etc.)
+# ------------------------------------------------------------------
+# Example:
+# appservices:
+#   telegram:
+#     url: "http://matrix-bridges-mautrix-telegram.default.svc.cluster.local:8080"
+#     asToken: "..."
+#     hsToken: "..."
+#     senderLocalpart: "telegrambot"
+#     users:
+#       - exclusive: true
+#         regex: '^@telegram_.*:example\.com$'
+appservices: {}

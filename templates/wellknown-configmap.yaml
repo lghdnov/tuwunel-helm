@@ -25,4 +25,19 @@ data:
         {{- end }}
       ]{{- end }}
     }
+  nginx.conf: |
+    server {
+      listen 80;
+      server_name localhost;
+      root /usr/share/nginx/html;
+      default_type application/json;
+      location / {
+        add_header Access-Control-Allow-Origin * always;
+        add_header Access-Control-Allow-Methods "GET, HEAD, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization" always;
+        if ($request_method = 'OPTIONS') {
+          return 204;
+        }
+      }
+    }
 {{- end }}

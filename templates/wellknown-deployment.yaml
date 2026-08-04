@@ -43,10 +43,19 @@ spec:
           volumeMounts:
             - name: wellknown-data
               mountPath: /usr/share/nginx/html
+            - name: wellknown-nginx-config
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
       volumes:
         - name: wellknown-config
           configMap:
             name: {{ include "tuwunel.fullname" . }}-wellknown
         - name: wellknown-data
           emptyDir: {}
+        - name: wellknown-nginx-config
+          configMap:
+            name: {{ include "tuwunel.fullname" . }}-wellknown
+            items:
+              - key: nginx.conf
+                path: default.conf
 {{- end }}

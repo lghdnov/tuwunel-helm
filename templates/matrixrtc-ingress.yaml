@@ -1,0 +1,51 @@
+{{- if .Values.matrixRtc.enabled }}
+{{- $fullName := include "tuwunel.fullname" . }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-matrixrtc
+  labels:
+    {{- include "tuwunel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: matrixrtc
+  {{- with .Values.matrixRtc.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.matrixRtc.ingress.className }}
+  ingressClassName: {{ .Values.matrixRtc.ingress.className }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.matrixRtc.ingress.host | quote }}
+      http:
+        paths:
+          {{- if .Values.matrixRtc.authService.deploy }}
+          - path: /sfu/get
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}-matrixrtc-auth
+                port:
+                  name: http
+          - path: /get_token
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}-matrixrtc-auth
+                port:
+                  name: http
+          {{- end }}
+          {{- if .Values.matrixRtc.livekit.deploy }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}-livekit
+                port:
+                  name: http
+          {{- end }}
+  {{- if .Values.matrixRtc.ingress.tls }}
+  tls:
+    {{- toYaml .Values.matrixRtc.ingress.tls | nindent 4 }}
+  {{- end }}
+{{- end }}

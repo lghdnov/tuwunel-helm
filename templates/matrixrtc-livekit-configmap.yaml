@@ -10,7 +10,6 @@ data:
   livekit.yaml: |
     port: {{ .Values.matrixRtc.livekit.config.port }}
     rtc:
-      udp_port: {{ .Values.matrixRtc.livekit.config.rtc.udp_port }}
       tcp_port: {{ .Values.matrixRtc.livekit.config.rtc.tcp_port }}
       {{- if .Values.matrixRtc.livekit.config.rtc.use_external_ip }}
       use_external_ip: true
@@ -21,8 +20,13 @@ data:
       use_external_ip: false
       node_ip: ${NODE_IP}
       {{- end }}
+      {{- if .Values.matrixRtc.livekit.config.rtc.udp_port }}
+      udp_port: {{ .Values.matrixRtc.livekit.config.rtc.udp_port }}
+      {{- end }}
+      {{- if .Values.matrixRtc.livekit.config.rtc.port_range_start }}
       port_range_start: {{ .Values.matrixRtc.livekit.config.rtc.port_range_start }}
       port_range_end: {{ .Values.matrixRtc.livekit.config.rtc.port_range_end }}
+      {{- end }}
     keys:
       {{- toYaml .Values.matrixRtc.livekit.config.keys | nindent 6 }}
     webhook:

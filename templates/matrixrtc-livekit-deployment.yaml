@@ -8,6 +8,10 @@ metadata:
     app.kubernetes.io/component: livekit
 spec:
   replicas: 1
+  {{- if .Values.matrixRtc.livekit.hostNetwork }}
+  strategy:
+    type: Recreate
+  {{- end }}
   selector:
     matchLabels:
       {{- include "tuwunel.selectorLabels" . | nindent 6 }}

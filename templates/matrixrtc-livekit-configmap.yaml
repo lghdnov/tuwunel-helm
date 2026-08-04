@@ -12,7 +12,15 @@ data:
     rtc:
       udp_port: {{ .Values.matrixRtc.livekit.config.rtc.udp_port }}
       tcp_port: {{ .Values.matrixRtc.livekit.config.rtc.tcp_port }}
-      use_external_ip: {{ .Values.matrixRtc.livekit.config.rtc.use_external_ip }}
+      {{- if .Values.matrixRtc.livekit.config.rtc.use_external_ip }}
+      use_external_ip: true
+      {{- else if .Values.matrixRtc.livekit.config.rtc.node_ip }}
+      use_external_ip: false
+      node_ip: {{ .Values.matrixRtc.livekit.config.rtc.node_ip | quote }}
+      {{- else }}
+      use_external_ip: false
+      node_ip: ${NODE_IP}
+      {{- end }}
       port_range_start: {{ .Values.matrixRtc.livekit.config.rtc.port_range_start }}
       port_range_end: {{ .Values.matrixRtc.livekit.config.rtc.port_range_end }}
     keys:

@@ -28,6 +28,26 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+      initContainers:
+        - name: render-config
+          image: busybox:stable
+          command:
+            - sh
+            - -c
+            - |
+              export NODE_IP="${NODE_IP}"
+              envsubst < /config-template/livekit.yaml > /etc/livekit/livekit.yaml
+              cat /etc/livekit/livekit.yaml
+          env:
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+            - name: config
+              mountPath: /etc/livekit
       containers:
         - name: livekit
           image: "livekit/livekit-server:v1.8.4"
@@ -73,9 +93,11 @@ spec:
               cpu: 500m
               memory: 256Mi
       volumes:
-        - name: config
+        - name: config-template
           configMap:
             name: {{ include "tuwunel.fullname" . }}-livekit-config
+        - name: config
+          emptyDir: {}
       {{- with .Values.matrixRtc.livekit.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
